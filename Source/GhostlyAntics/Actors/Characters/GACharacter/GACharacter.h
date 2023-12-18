@@ -24,9 +24,9 @@ class GHOSTLYANTICS_API AGACharacter : public ACharacter
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	class UInputMappingContext* DefaultMappingContext;
 
-	/** Jump Input Action */
+	/** Interact Input Action */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
-	class UInputAction* JumpAction;
+	class UInputAction* InteractAction;
 
 	/** Move Input Action */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
@@ -47,6 +47,11 @@ protected:
 	/** Called for looking input */
 	void Look(const FInputActionValue& Value);
 
+	/** Called for interact input */
+	void Interact(const FInputActionValue& Value);
+
+	/** Called for interact input ended */
+	void StopInteract(const FInputActionValue& Value);
 
 protected:
 	// Called to bind functionality to input

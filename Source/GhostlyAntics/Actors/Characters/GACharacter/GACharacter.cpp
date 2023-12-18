@@ -31,7 +31,6 @@ AGACharacter::AGACharacter()
 
 	// Note: For faster iteration times these variables, and many more, can be tweaked in the Character Blueprint
 	// instead of recompiling to adjust them
-	GetCharacterMovement()->JumpZVelocity = 700.f;
 	GetCharacterMovement()->AirControl = 0.35f;
 	GetCharacterMovement()->MaxWalkSpeed = 500.f;
 	GetCharacterMovement()->MinAnalogWalkSpeed = 20.f;
@@ -84,9 +83,9 @@ void AGACharacter::SetupPlayerInputComponent(class UInputComponent* PlayerInputC
 	// Set up action bindings
 	if (UEnhancedInputComponent* EnhancedInputComponent = CastChecked<UEnhancedInputComponent>(PlayerInputComponent)) {
 
-		//Jumping
-		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Triggered, this, &ACharacter::Jump);
-		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Completed, this, &ACharacter::StopJumping);
+		//Interact
+		EnhancedInputComponent->BindAction(InteractAction, ETriggerEvent::Started, this, &AGACharacter::Interact);
+		EnhancedInputComponent->BindAction(InteractAction, ETriggerEvent::Completed, this, &AGACharacter::StopInteract);
 
 		//Moving
 		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &AGACharacter::Move);
@@ -132,4 +131,14 @@ void AGACharacter::Look(const FInputActionValue& Value)
 		AddControllerYawInput(LookAxisVector.X);
 		AddControllerPitchInput(LookAxisVector.Y);
 	}
+}
+
+void AGACharacter::Interact(const FInputActionValue& Value)
+{
+	UE_LOG(LogTemp, Warning, TEXT("Start interaction"));
+}
+
+void AGACharacter::StopInteract(const FInputActionValue& Value)
+{
+	UE_LOG(LogTemp, Warning, TEXT("Interaction Ended"));
 }
