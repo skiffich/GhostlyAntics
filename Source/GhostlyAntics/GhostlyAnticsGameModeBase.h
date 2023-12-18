@@ -13,5 +13,6 @@ UCLASS()
 class GHOSTLYANTICS_API AGhostlyAnticsGameModeBase : public AGameModeBase
 {
 	GENERATED_BODY()
-	
+public:
+	AGhostlyAnticsGameModeBase();
 };
