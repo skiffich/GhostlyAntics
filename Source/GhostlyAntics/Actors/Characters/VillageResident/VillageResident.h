@@ -3,17 +3,17 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "GameFramework/Character.h"
-#include "GACharacter.generated.h"
+#include "../../Characters/GACharacter/GACharacter.h"
+#include "VillageResident.generated.h"
 
 UCLASS()
-class GHOSTLYANTICS_API AGACharacter : public ACharacter
+class GHOSTLYANTICS_API AVillageResident : public AGACharacter
 {
 	GENERATED_BODY()
 
 public:
 	// Sets default values for this character's properties
-	AGACharacter();
+	AVillageResident();
 
 protected:
 
