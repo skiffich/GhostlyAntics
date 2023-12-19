@@ -25,8 +25,7 @@ AGhostCharacter::AGhostCharacter()
 	FollowCamera->SetupAttachment(CameraBoom, USpringArmComponent::SocketName); // Attach the camera to the end of the boom and let the boom adjust to match the controller orientation
 	FollowCamera->bUsePawnControlRotation = false; // Camera does not rotate relative to arm
 
-	// Note: The skeletal mesh and anim blueprint references on the Mesh component (inherited from Character) 
-	// are set in the derived blueprint asset named ThirdPersonCharacter (to avoid direct content references in C++)
+	OverlappedInteractableItem = nullptr;
 }
 
 // Called when the game starts or when spawned
@@ -51,6 +50,12 @@ void AGhostCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+}
+
+void AGhostCharacter::SetCurrentInteractable(IInteractInterface* NewInteractable)
+{
+	UE_LOG(LogTemp, Warning, TEXT("AGhostCharacter::SetCurrentInteractable = %p"), NewInteractable);
+	OverlappedInteractableItem = NewInteractable;
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -114,11 +119,19 @@ void AGhostCharacter::Look(const FInputActionValue& Value)
 void AGhostCharacter::Interact(const FInputActionValue& Value)
 {
 	UE_LOG(LogTemp, Warning, TEXT("Start interaction"));
+	if (OverlappedInteractableItem)
+	{
+		OverlappedInteractableItem->BeginInteract();
+	}
 }
 
 void AGhostCharacter::StopInteract(const FInputActionValue& Value)
 {
 	UE_LOG(LogTemp, Warning, TEXT("Interaction Ended"));
+	if (OverlappedInteractableItem)
+	{
+		OverlappedInteractableItem->StopInteract();
+	}
 }
 
 

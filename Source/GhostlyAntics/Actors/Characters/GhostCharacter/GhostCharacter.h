@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "../../Characters/GACharacter/GACharacter.h"
 #include "InputActionValue.h"
+#include "../../InteractInterface.h"
 #include "GhostCharacter.generated.h"
 
 /**
@@ -39,6 +40,8 @@ class GHOSTLYANTICS_API AGhostCharacter : public AGACharacter
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	class UInputAction* LookAction;
 
+	IInteractInterface* OverlappedInteractableItem;
+
 public:
 	// Sets default values for this character's properties
 	AGhostCharacter();
@@ -71,4 +74,6 @@ public:
 	FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
 	/** Returns FollowCamera subobject **/
 	FORCEINLINE class UCameraComponent* GetFollowCamera() const { return FollowCamera; }
+
+	void SetCurrentInteractable(IInteractInterface* NewInteractable);
 };
