@@ -54,7 +54,6 @@ void AGhostCharacter::Tick(float DeltaTime)
 
 void AGhostCharacter::SetCurrentInteractable(IInteractInterface* NewInteractable)
 {
-	UE_LOG(LogTemp, Warning, TEXT("AGhostCharacter::SetCurrentInteractable = %p"), NewInteractable);
 	OverlappedInteractableItem = NewInteractable;
 }
 
@@ -120,7 +119,7 @@ void AGhostCharacter::Interact(const FInputActionValue& Value)
 {
 	if (OverlappedInteractableItem)
 	{
-		OverlappedInteractableItem->BeginInteract();
+		OverlappedInteractableItem->BeginInteract(this);
 	}
 }
 
@@ -128,7 +127,7 @@ void AGhostCharacter::StopInteract(const FInputActionValue& Value)
 {
 	if (OverlappedInteractableItem)
 	{
-		OverlappedInteractableItem->StopInteract();
+		OverlappedInteractableItem->StopInteract(this);
 	}
 }
 

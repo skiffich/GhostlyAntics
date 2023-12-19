@@ -10,6 +10,6 @@
 class IInteractInterface
 {
 public:
-    virtual void BeginInteract() = 0;
-    virtual void StopInteract() = 0;
+    virtual void BeginInteract(APawn* InstigatorPawn) = 0;
+    virtual void StopInteract(APawn* InstigatorPawn) = 0;
 };

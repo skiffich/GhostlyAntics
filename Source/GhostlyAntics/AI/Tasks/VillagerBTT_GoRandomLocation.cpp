@@ -1,7 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "../AI/VillagerBTT_GoRandomLocation.h"
+#include "../../AI/Tasks/VillagerBTT_GoRandomLocation.h"
 #include "BehaviorTree/BlackboardComponent.h"
 #include "AIController.h"
 #include "NavigationSystem.h"

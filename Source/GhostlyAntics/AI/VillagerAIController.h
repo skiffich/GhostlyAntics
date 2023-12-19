@@ -7,6 +7,9 @@
 #include "BehaviorTree/BehaviorTreeComponent.h"
 #include "BehaviorTree/BlackboardComponent.h"
 #include "BehaviorTree/BehaviorTree.h"
+#include "Perception/AIPerceptionComponent.h"
+#include "Perception/AISenseConfig_Sight.h"
+#include "Perception/AISenseConfig_Hearing.h"
 #include "VillagerAIController.generated.h"
 
 /**
@@ -38,4 +41,19 @@ private:
     // The behavior tree that contains the logic for the villager
     UPROPERTY(EditDefaultsOnly, Category = "AI", meta=(AllowPrivateAccess = true))
     UBehaviorTree* BehaviorTree;
+
+    // AI Perception Component reference
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AI", meta = (AllowPrivateAccess = true))
+    UAIPerceptionComponent* AIPerceptionComp;
+
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AI", meta = (AllowPrivateAccess = true))
+    UAISenseConfig_Sight* SightConfig;
+
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AI", meta = (AllowPrivateAccess = true))
+    UAISenseConfig_Hearing* HearingConfig;
+
+protected:
+
+    UFUNCTION()
+    void OnPerceptionUpdated(AActor* Actor, FAIStimulus Stimulus);
 };

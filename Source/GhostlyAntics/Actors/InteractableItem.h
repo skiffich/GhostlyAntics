@@ -6,6 +6,8 @@
 #include "GameFramework/Actor.h"
 #include <Components/SphereComponent.h>
 #include "../Actors/InteractInterface.h"
+#include "Sound/SoundCue.h"
+#include "Components/AudioComponent.h"
 #include "InteractableItem.generated.h"
 
 UCLASS()
@@ -24,6 +26,13 @@ class GHOSTLYANTICS_API AInteractableItem : public AActor, public IInteractInter
 	UFUNCTION()
 	void OnOverlapEnd(class UPrimitiveComponent* OverlappedComp, class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
 
+protected:
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Audio")
+	UAudioComponent* AudioComponent;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Audio")
+	USoundCue* SoundToPlay;
+
 public:	
 	// Sets default values for this actor's properties
 	AInteractableItem();
@@ -36,6 +45,6 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
-	virtual void BeginInteract() override;
-	virtual void StopInteract() override;
+	virtual void BeginInteract(APawn* InstigatorPawn) override;
+	virtual void StopInteract(APawn* InstigatorPawn) override;
 };

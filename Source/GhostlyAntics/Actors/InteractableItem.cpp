@@ -38,6 +38,7 @@ AInteractableItem::AInteractableItem()
     InteractionSphere->OnComponentBeginOverlap.AddDynamic(this, &AInteractableItem::OnOverlapBegin);
     InteractionSphere->OnComponentEndOverlap.AddDynamic(this, &AInteractableItem::OnOverlapEnd);
 
+    AudioComponent = CreateDefaultSubobject<UAudioComponent>(TEXT("AudioComponent"));
 }
 
 // Called when the game starts or when spawned
@@ -54,27 +55,43 @@ void AInteractableItem::Tick(float DeltaTime)
 
 }
 
-void AInteractableItem::BeginInteract()
+void AInteractableItem::BeginInteract(APawn* InstigatorPawn)
 {
 }
 
-void AInteractableItem::StopInteract()
+void AInteractableItem::StopInteract(APawn* InstigatorPawn)
 {
-    UE_LOG(LogTemp, Warning, TEXT("AInteractableItem::StopInteract"));
-    // Move the actor up by a certain amount
-    FVector NewLocation = GetActorLocation() + FVector(0, 0, 100); // Adjust the Z-axis offset as needed
-    SetActorLocation(NewLocation);
+    // return if it is still in action
+    if (StaticMesh->IsSimulatingPhysics())
+    {
+        return;
+    }
 
     // Enable physics simulation
     StaticMesh->SetSimulatePhysics(true);
+
+    // save previous location
+    FVector PrevLocation = GetActorLocation();
+
+    // Move the actor up 
+    StaticMesh->AddForce(FVector(0.f, 0.f, StaticMesh->CalculateMass() * 30000));
 
     // Declare a local timer handle
     FTimerHandle PhysicsTimerHandle;
 
     // Set a timer to disable physics after 5 seconds using a lambda
-    GetWorld()->GetTimerManager().SetTimer(PhysicsTimerHandle, [this]()
+    GetWorld()->GetTimerManager().SetTimer(PhysicsTimerHandle, [this, PrevLocation]()
     {
         StaticMesh->SetSimulatePhysics(false);
+        SetActorLocation(PrevLocation);
     }, 5.0f, false);
+
+    if (SoundToPlay)
+    {
+        AudioComponent->SetSound(SoundToPlay);
+        AudioComponent->Play();
+
+        MakeNoise(1.f, InstigatorPawn, GetActorLocation());
+    }
 }
 
