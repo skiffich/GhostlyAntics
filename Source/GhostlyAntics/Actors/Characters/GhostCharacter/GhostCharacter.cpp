@@ -118,7 +118,6 @@ void AGhostCharacter::Look(const FInputActionValue& Value)
 
 void AGhostCharacter::Interact(const FInputActionValue& Value)
 {
-	UE_LOG(LogTemp, Warning, TEXT("Start interaction"));
 	if (OverlappedInteractableItem)
 	{
 		OverlappedInteractableItem->BeginInteract();
@@ -127,7 +126,6 @@ void AGhostCharacter::Interact(const FInputActionValue& Value)
 
 void AGhostCharacter::StopInteract(const FInputActionValue& Value)
 {
-	UE_LOG(LogTemp, Warning, TEXT("Interaction Ended"));
 	if (OverlappedInteractableItem)
 	{
 		OverlappedInteractableItem->StopInteract();
