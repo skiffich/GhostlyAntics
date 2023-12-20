@@ -5,7 +5,7 @@
 #include "CoreMinimal.h"
 #include "../../Characters/GACharacter/GACharacter.h"
 #include "InputActionValue.h"
-#include "../../InteractInterface.h"
+#include "../../InteractableItems/InteractInterface.h"
 #include "GhostCharacter.generated.h"
 
 /**

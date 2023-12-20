@@ -2,6 +2,7 @@
 
 
 #include "../AI/VillagerAIController.h"
+#include "../Actors/InteractableItems/InteractableItemPawn.h"
 
 AVillagerAIController::AVillagerAIController()
 {
@@ -80,10 +81,22 @@ void AVillagerAIController::OnPerceptionUpdated(AActor* Actor, FAIStimulus Stimu
         if (Stimulus.Type == UAISense::GetSenseID<UAISense_Sight>())
         {
             UE_LOG(LogTemp, Warning, TEXT("Actor %s was seen"), *Actor->GetName());
+
+            if (BlackboardComp)
+            {
+                FVector Location = Stimulus.StimulusLocation;
+                BlackboardComp->SetValueAsVector("StimulusLocation", Location);
+            }
         }
         else if (Stimulus.Type == UAISense::GetSenseID<UAISense_Hearing>())
         {
             UE_LOG(LogTemp, Warning, TEXT("Actor %s was heard"), *Actor->GetName());
+        }
+
+        if (AInteractableItemPawn* item = Cast<AInteractableItemPawn>(Actor))
+        {
+            UE_LOG(LogTemp, Warning, TEXT("InteractableItem %s was detected"), *Actor->GetName());
+
         }
     }
 }
