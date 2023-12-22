@@ -11,4 +11,11 @@ AGhostlyAnticsGameModeBase::AGhostlyAnticsGameModeBase()
 	{
 		DefaultPawnClass = PlayerPawnBPClass.Class;
 	}
+
+	// set default player controller class to our Blueprinted character
+	static ConstructorHelpers::FClassFinder<APawn> GhostControllerClass(TEXT("/Game/Controllers/BP_GhostController"));
+	if (PlayerPawnBPClass.Class != NULL)
+	{
+		PlayerControllerClass = GhostControllerClass.Class;
+	}
 }
