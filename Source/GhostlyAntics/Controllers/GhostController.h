@@ -19,6 +19,8 @@ public:
 
 	virtual void BeginPlay() override;
 
+	TArray<APawn*> GetInteractibleActors();
+
 private:
 	void StartActorCheckTimer();
 	void GetActorsInScreenArea();
@@ -32,4 +34,6 @@ private:
 	// Size of the trace box. x - depth; y - width; z - heigh
 	UPROPERTY(EditDefaultsOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
 	float TraceAreaBoxAngle;
+
+	TArray<APawn*> InteractionPawns;
 };

@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Pawn.h"
-#include <Components/SphereComponent.h>
+#include "Components/WidgetComponent.h"
 #include "../InteractableItems/InteractInterface.h"
 #include "Sound/SoundCue.h"
 #include "Components/AudioComponent.h"
@@ -37,11 +37,8 @@ public:
 
 protected:
 
-	UPROPERTY(VisibleAnywhere, Category = "Components")
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	UStaticMeshComponent* StaticMesh;
-
-	UPROPERTY(VisibleAnywhere, Category = "Components")
-	USphereComponent* InteractionSphere;
 
 	EInteractionState InteractionState;
 
@@ -55,6 +52,12 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Interaction")
 	EInteractActionType InteractActionType;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Interaction")
+	float HardInteractionTime;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "UI")
+	UWidgetComponent* InteractionWidgetComponent;
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -63,17 +66,21 @@ protected:
 	virtual void FinishInteract();
 
 public:	
-	virtual void BeginInteract(APawn* InstigatorPawn) override;
-	virtual void StopInteract(APawn* InstigatorPawn) override;
+	virtual void BeginInteract() override;
+	virtual void StopInteract() override;
+
+	void EnableInteraction();
 
 	inline EInteractActionType GetInteractActionType() { return InteractActionType; }
 
 private:
-	UFUNCTION()
-	void OnOverlapBegin(class UPrimitiveComponent* OverlappedComp, class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
-	UFUNCTION()
-	void OnOverlapEnd(class UPrimitiveComponent* OverlappedComp, class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
+	FTimerHandle InteractionTimerHandle;
+	class UIteractibleItemUI* InteractibleWidget;
 
-private:
-	void TelekinezThrowUp();
+	FTimerHandle UpdateUITimerHandle;
+	FDateTime InteractionStartTime;
+	
+	bool isHardInteract = false;
+
+	void UpdateUI();
 };

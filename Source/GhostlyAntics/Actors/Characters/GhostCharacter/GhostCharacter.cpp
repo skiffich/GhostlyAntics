@@ -10,6 +10,8 @@
 #include "GameFramework/SpringArmComponent.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
+#include "../../InteractableItems/InteractableItemPawn.h"
+#include "../../../Controllers/GhostController.h"
 
 // Sets default values
 AGhostCharacter::AGhostCharacter()
@@ -76,7 +78,6 @@ void AGhostCharacter::SetupPlayerInputComponent(class UInputComponent* PlayerInp
 		EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &AGhostCharacter::Look);
 
 	}
-
 }
 
 void AGhostCharacter::Move(const FInputActionValue& Value)
@@ -117,17 +118,33 @@ void AGhostCharacter::Look(const FInputActionValue& Value)
 
 void AGhostCharacter::Interact(const FInputActionValue& Value)
 {
-	if (OverlappedInteractableItem)
+	AGhostController* GhostController = Cast<AGhostController>(GetController());
+	if (GhostController)
 	{
-		OverlappedInteractableItem->BeginInteract(this);
+		TArray<APawn*> InteractableItems = GhostController->GetInteractibleActors();
+		if (InteractableItems.Num() > 0)
+		{
+			if (AInteractableItemPawn* InteractableItem = Cast<AInteractableItemPawn>(InteractableItems[0]))
+			{
+				InteractableItem->BeginInteract();
+			}
+		}
 	}
 }
 
 void AGhostCharacter::StopInteract(const FInputActionValue& Value)
 {
-	if (OverlappedInteractableItem)
+	AGhostController* GhostController = Cast<AGhostController>(GetController());
+	if (GhostController)
 	{
-		OverlappedInteractableItem->StopInteract(this);
+		TArray<APawn*> InteractableItems = GhostController->GetInteractibleActors();
+		if (InteractableItems.Num() > 0)
+		{
+			if (AInteractableItemPawn* InteractableItem = Cast<AInteractableItemPawn>(InteractableItems[0]))
+			{
+				InteractableItem->StopInteract();
+			}
+		}
 	}
 }
 

@@ -27,7 +27,6 @@ AVillagerAIController::AVillagerAIController()
     // Initialize the hearing configuration
     HearingConfig = CreateDefaultSubobject<UAISenseConfig_Hearing>(TEXT("HearingConfig"));
     HearingConfig->HearingRange = 500.0f;
-    HearingConfig->LoSHearingRange = 700.0f;
     HearingConfig->DetectionByAffiliation.bDetectEnemies = true;
     HearingConfig->DetectionByAffiliation.bDetectFriendlies = true;
     HearingConfig->DetectionByAffiliation.bDetectNeutrals = true;

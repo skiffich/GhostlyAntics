@@ -43,6 +43,11 @@ void AGhostController::BeginPlay()
     StartActorCheckTimer();
 }
 
+TArray<APawn*> AGhostController::GetInteractibleActors()
+{
+    return InteractionPawns;
+}
+
 void AGhostController::StartActorCheckTimer()
 {
     // Start a repeating timer
@@ -130,6 +135,20 @@ void AGhostController::GetActorsInScreenArea()
         });
 
     // Process hit results
+
+    if (HitResults.Num() > 0)
+    {
+        if (AInteractableItemPawn* ItemPawn = Cast<AInteractableItemPawn>(HitResults[0].GetActor()))
+        {
+            ItemPawn->EnableInteraction();
+        }
+    }
+
+    InteractionPawns.Empty();
+    for (const FHitResult& Hit : HitResults)
+    {
+        InteractionPawns.Add(Cast<AInteractableItemPawn>(Hit.GetActor()));
+    }
 
     // Draw lines to HitResults depending on distance to Hit Impact Point
     if (CVarDrawDebugLinesToHitResults.GetValueOnGameThread() == 1)
