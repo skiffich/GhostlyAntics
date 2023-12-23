@@ -67,11 +67,12 @@ void AGhostController::GetActorsInScreenArea()
     // Convert screen coordinates to world space
     FVector WorldStartCentr, WorldDirectionCentr;
     DeprojectScreenPositionToWorld(ScreenCenter.X, ScreenCenter.Y, WorldStartCentr, WorldDirectionCentr);
-    FVector WorldEndCentr = WorldStartCentr + (WorldDirectionCentr * (GhostCharacter->GetCameraBoom()->TargetArmLength + TraceAreaBoxSize.X / 2.5));
+    FVector WorldEndCentr = WorldStartCentr + (WorldDirectionCentr * (GhostCharacter->GetCameraBoom()->TargetArmLength + TraceAreaBoxSize.X / 2.0));
+    WorldEndCentr.Z = GhostCharacter->GetActorLocation().Z;
 
     // Define the trace box
-    FVector BoxExtent = TraceAreaBoxSize / 2; // Half-size of the box
-    FCollisionShape Box = FCollisionShape::MakeBox(BoxExtent);
+    FVector BoxHalfExtent = TraceAreaBoxSize / 2; // Half-size of the box
+    FCollisionShape Box = FCollisionShape::MakeBox(BoxHalfExtent);
 
     // get box rotation in WorldDirectionCentr direction
     FQuat BoxRotation = FQuat(WorldDirectionCentr.Rotation());
@@ -84,7 +85,7 @@ void AGhostController::GetActorsInScreenArea()
     // Draw the right vector of the box
     if (CVarDrawDebugLines.GetValueOnAnyThread() == 1)
     {
-        DrawDebugLine(GetWorld(), WorldEndCentr, WorldEndCentr + BoxRightVector * BoxExtent.Size(), FColor::Red, false, 2.0f, 0, 5);
+        DrawDebugLine(GetWorld(), WorldEndCentr, WorldEndCentr + BoxRightVector * BoxHalfExtent.Size(), FColor::Red, false, 0.1f, 0, 2.0);
     }
 
     // Create a quaternion representing the horizontal rotation around the right axis
@@ -95,17 +96,17 @@ void AGhostController::GetActorsInScreenArea()
 
     // Perform the box trace
     TArray<FHitResult> HitResults;
-    GetWorld()->SweepMultiByChannel(HitResults, WorldEndCentr, WorldEndCentr + WorldDirectionCentr * BoxExtent.Size(), BoxRotation, ECC_Visibility, Box);
+    GetWorld()->SweepMultiByChannel(HitResults, WorldEndCentr, WorldEndCentr, BoxRotation, ECC_Pawn, Box);
 
     // Draw the debug box
     if (CVarDrawTraceBox.GetValueOnAnyThread() == 1)
     {
-        DrawDebugBox(GetWorld(), WorldEndCentr, BoxExtent, BoxRotation, FColor::Green, false, 0.1f, 0, 3.0);
+        DrawDebugBox(GetWorld(), WorldEndCentr, BoxHalfExtent, BoxRotation, FColor::Green, false, 0.1f, 0, 3.0);
     }
     // draw the line from the box centr to end of the box
     if (CVarDrawDebugLines.GetValueOnAnyThread() == 1)
     {
-        DrawDebugLine(GetWorld(), WorldEndCentr, WorldEndCentr + BoxRotation.Vector() * BoxExtent.Size(), FColor::Red, false, 2.0f, 0, 1);
+        DrawDebugLine(GetWorld(), WorldEndCentr, WorldEndCentr + BoxRotation.Vector() * BoxHalfExtent.Size(), FColor::Red, false, 2.0f, 0, 1);
     }
 
     // filter only thouse HitResults which could be casted to AInteractableItemPawn
@@ -139,8 +140,8 @@ void AGhostController::GetActorsInScreenArea()
             // Calculate color of debug line depending on the distance from WorldEndCentr
             float ColorRatio = NumHits > 1 ? i / static_cast<float>(NumHits - 1) : 0.0;
             FColor LineColor = FColor::MakeRedToGreenColorFromScalar(ColorRatio); // Red is closer; Green is farther
-
-            DrawDebugLine(GetWorld(), GhostCharacter->GetActorLocation() /* WorldEndCentr */, HitResults[i].ImpactPoint /* Hit.GetActor()->GetActorLocation() */, LineColor, false, 0.1f, 0, 3);
+            UE_LOG(LogTemp, Display, TEXT("%s"), *HitResults[i].GetActor()->GetName());
+            DrawDebugLine(GetWorld(), GhostCharacter->GetActorLocation(), HitResults[i].GetActor()->GetActorLocation(), LineColor, false, 0.1f, 0, 3);
         }
     }
 }
