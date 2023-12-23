@@ -6,6 +6,31 @@
 #include "GameFramework/SpringArmComponent.h"
 #include "../Actors/InteractableItems/InteractableItemPawn.h"
 
+// Define a console variable
+static TAutoConsoleVariable<int32> CVarDrawDebugLinesToHitResults(
+    TEXT("Ghost.DrawDebugLinesToHitResults"),
+    0,
+    TEXT("Draw debug lines to HitResults for GhostController.\n")
+    TEXT("0: Do not draw debug lines (default)\n")
+    TEXT("1: Draw debug lines"),
+    ECVF_Cheat);
+
+static TAutoConsoleVariable<int32> CVarDrawTraceBox(
+    TEXT("Ghost.DrawDebugTraceBox"),
+    0,
+    TEXT("Draw TraceBox.\n")
+    TEXT("0: Do not draw debug TraceBox (default)\n")
+    TEXT("1: Draw debug TraceBox"),
+    ECVF_Cheat);
+
+static TAutoConsoleVariable<int32> CVarDrawDebugLines(
+    TEXT("Ghost.DrawDebugLines"),
+    0,
+    TEXT("Draw BoxRightVector and BoxLine.\n")
+    TEXT("0: Do not draw debug lines (default)\n")
+    TEXT("1: Draw debug lines"),
+    ECVF_Cheat);
+
 AGhostController::AGhostController()
 {
     TraceAreaBoxSize = FVector(200.f, 100.f, 200.f);
@@ -30,6 +55,7 @@ void AGhostController::GetActorsInScreenArea()
     AGhostCharacter* GhostCharacter = Cast<AGhostCharacter>(GetPawn());
     if (!GhostCharacter)
     {
+        UE_LOG(LogTemp, Warning, TEXT("AGhostController::GetActorsInScreenArea Could not get GhostCharacter from Pawn %p"), GetPawn());
         return;
     }
 
@@ -56,7 +82,10 @@ void AGhostController::GetActorsInScreenArea()
     // get right axix of the box
     FVector BoxRightVector = FVector::CrossProduct(WorldDirectionCentr.GetSafeNormal(), FVector::UpVector);
     // Draw the right vector of the box
-    //DrawDebugLine(GetWorld(), WorldEndCentr, WorldEndCentr + BoxRightVector * BoxExtent.Size(), FColor::Red, false, 2.0f, 0, 5);
+    if (CVarDrawDebugLines.GetValueOnAnyThread() == 1)
+    {
+        DrawDebugLine(GetWorld(), WorldEndCentr, WorldEndCentr + BoxRightVector * BoxExtent.Size(), FColor::Red, false, 2.0f, 0, 5);
+    }
 
     // Create a quaternion representing the horizontal rotation around the right axis
     FQuat HorizontalRotation = FQuat(BoxRightVector, AngleInRadians);
@@ -69,28 +98,49 @@ void AGhostController::GetActorsInScreenArea()
     GetWorld()->SweepMultiByChannel(HitResults, WorldEndCentr, WorldEndCentr + WorldDirectionCentr * BoxExtent.Size(), BoxRotation, ECC_Visibility, Box);
 
     // Draw the debug box
-    DrawDebugBox(GetWorld(), WorldEndCentr, BoxExtent, BoxRotation, FColor::Green, false, 1.0f, 0, 5);
-    // draw line from the player to end of the box
-    //DrawDebugLine(GetWorld(), GhostCharacter->GetActorLocation(), GhostCharacter->GetActorLocation() + WorldDirectionCentr * BoxExtent.Size() * 2, FColor::Red, false, 2.0f, 0, 5);
+    if (CVarDrawTraceBox.GetValueOnAnyThread() == 1)
+    {
+        DrawDebugBox(GetWorld(), WorldEndCentr, BoxExtent, BoxRotation, FColor::Green, false, 0.1f, 0, 3.0);
+    }
+    // draw the line from the box centr to end of the box
+    if (CVarDrawDebugLines.GetValueOnAnyThread() == 1)
+    {
+        DrawDebugLine(GetWorld(), WorldEndCentr, WorldEndCentr + BoxRotation.Vector() * BoxExtent.Size(), FColor::Red, false, 2.0f, 0, 1);
+    }
+
+    // filter only thouse HitResults which could be casted to AInteractableItemPawn
+    HitResults = HitResults.FilterByPredicate(
+        [](const FHitResult& HitResult)
+        {
+            // Attempt to cast the hit actor to AInteractableItemPawn
+            AInteractableItemPawn* ItemPawn = Cast<AInteractableItemPawn>(HitResult.GetActor());
+            return ItemPawn != nullptr;
+        });
+
+    // Sort HitResults depending on distance to Hit Impact Point
+    HitResults.Sort(
+        [WorldEndCentr](const FHitResult& A, const FHitResult& B) 
+        {
+            // Distance from WorldEndCentr to the Hit Impact Point
+            float DistA = (A.ImpactPoint - WorldEndCentr).SizeSquared();
+            float DistB = (B.ImpactPoint - WorldEndCentr).SizeSquared();
+
+            return DistA < DistB;
+        });
 
     // Process hit results
-    for (const FHitResult& Hit : HitResults.FilterByPredicate(
-        [](const FHitResult& HitResult)
-    {
-        // Attempt to cast the hit actor to AInteractableItemPawn
-        AInteractableItemPawn* ItemPawn = Cast<AInteractableItemPawn>(HitResult.GetActor());
 
-        // Return true if the cast is successful, false otherwise
-        return ItemPawn != nullptr;
-    }))
+    // Draw lines to HitResults depending on distance to Hit Impact Point
+    if (CVarDrawDebugLinesToHitResults.GetValueOnGameThread() == 1)
     {
-        AActor* HitActor = Hit.GetActor();
-        if (HitActor)
+        int32 NumHits = HitResults.Num();
+        for (int32 i = 0; i < NumHits; ++i)
         {
-            if (AInteractableItemPawn* item = Cast<AInteractableItemPawn>(HitActor))
-            {
-                UE_LOG(LogTemp, Display, TEXT("AInteractableItemPawn %p %s is available"), item, *item->GetName());
-            }
+            // Calculate color of debug line depending on the distance from WorldEndCentr
+            float ColorRatio = NumHits > 1 ? i / static_cast<float>(NumHits - 1) : 0.0;
+            FColor LineColor = FColor::MakeRedToGreenColorFromScalar(ColorRatio); // Red is closer; Green is farther
+
+            DrawDebugLine(GetWorld(), GhostCharacter->GetActorLocation() /* WorldEndCentr */, HitResults[i].ImpactPoint /* Hit.GetActor()->GetActorLocation() */, LineColor, false, 0.1f, 0, 3);
         }
     }
 }
