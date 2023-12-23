@@ -140,7 +140,7 @@ void AGhostController::GetActorsInScreenArea()
     {
         if (AInteractableItemPawn* ItemPawn = Cast<AInteractableItemPawn>(HitResults[0].GetActor()))
         {
-            ItemPawn->EnableInteraction();
+            ItemPawn->ShowUITip();
         }
     }
 

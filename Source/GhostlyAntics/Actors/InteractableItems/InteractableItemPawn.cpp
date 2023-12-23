@@ -94,18 +94,21 @@ void AInteractableItemPawn::FinishInteract()
     InteractionState = EInteractionState::Ready;
 }
 
-void AInteractableItemPawn::EnableInteraction()
+void AInteractableItemPawn::ShowUITip()
 {
-    if (!GetWorld()->GetTimerManager().IsTimerActive(InteractionTimerHandle))
+    if (InteractionState == EInteractionState::Ready || InteractionState == EInteractionState::BeginInteract)
     {
-        InteractionWidgetComponent->SetVisibility(true);
-    }
-    GetWorld()->GetTimerManager().SetTimer(InteractionTimerHandle,
-        [this]() 
+        if (!GetWorld()->GetTimerManager().IsTimerActive(InteractionTimerHandle))
+        {
+            InteractionWidgetComponent->SetVisibility(true);
+        }
+        GetWorld()->GetTimerManager().SetTimer(InteractionTimerHandle,
+            [this]()
         {
             InteractionWidgetComponent->SetVisibility(false);
         },
-        0.1f, false);
+            0.1f, false);
+    }
 }
 
 void AInteractableItemPawn::UpdateUI()

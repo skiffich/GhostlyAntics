@@ -69,7 +69,7 @@ public:
 	virtual void BeginInteract() override;
 	virtual void StopInteract() override;
 
-	void EnableInteraction();
+	void ShowUITip();
 
 	inline EInteractActionType GetInteractActionType() { return InteractActionType; }
 
