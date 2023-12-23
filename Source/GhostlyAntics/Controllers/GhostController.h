@@ -15,6 +15,8 @@ class GHOSTLYANTICS_API AGhostController : public APlayerController
 	GENERATED_BODY()
 	
 public:
+	AGhostController();
+
 	virtual void BeginPlay() override;
 
 private:
@@ -22,4 +24,12 @@ private:
 	void GetActorsInScreenArea();
 
 	FTimerHandle ActorCheckTimerHandle;
+
+	// Size of the trace box. x - depth; y - width; z - heigh
+	UPROPERTY(EditDefaultsOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
+	FVector TraceAreaBoxSize;
+
+	// Size of the trace box. x - depth; y - width; z - heigh
+	UPROPERTY(EditDefaultsOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
+	float TraceAreaBoxAngle;
 };

@@ -6,6 +6,12 @@
 #include "GameFramework/SpringArmComponent.h"
 #include "../Actors/InteractableItems/InteractableItemPawn.h"
 
+AGhostController::AGhostController()
+{
+    TraceAreaBoxSize = FVector(200.f, 100.f, 200.f);
+    TraceAreaBoxAngle = 10;
+}
+
 void AGhostController::BeginPlay()
 {
     Super::BeginPlay();
@@ -32,40 +38,31 @@ void AGhostController::GetActorsInScreenArea()
     GetViewportSize(ViewportSizeX, ViewportSizeY);
     FVector2D ScreenCenter = FVector2D(ViewportSizeX / 2, ViewportSizeY / 2);
 
-    // Calculate top-left and bottom-right coordinates of the screen area
-    FVector2D TopLeft = FVector2D(ScreenCenter.X - 50, ScreenCenter.Y - 100);
-    FVector2D BottomRight = FVector2D(ScreenCenter.X + 50, ScreenCenter.Y + 100);
-
     // Convert screen coordinates to world space
-    FVector WorldStart, WorldDirection;
-    DeprojectScreenPositionToWorld(TopLeft.X, TopLeft.Y, WorldStart, WorldDirection);
-    FVector WorldEnd = WorldStart + (WorldDirection * GhostCharacter->GetCameraBoom()->TargetArmLength);
-
-    FVector WorldStartBR, WorldDirectionBR;
-    DeprojectScreenPositionToWorld(BottomRight.X, BottomRight.Y, WorldStartBR, WorldDirectionBR);
-    FVector WorldEndBR = WorldStartBR + (WorldDirectionBR * GhostCharacter->GetCameraBoom()->TargetArmLength);
-
     FVector WorldStartCentr, WorldDirectionCentr;
     DeprojectScreenPositionToWorld(ScreenCenter.X, ScreenCenter.Y, WorldStartCentr, WorldDirectionCentr);
-    FVector WorldEndCentr = WorldStartCentr + (WorldDirectionCentr * (GhostCharacter->GetCameraBoom()->TargetArmLength + 200.0f));
+    FVector WorldEndCentr = WorldStartCentr + (WorldDirectionCentr * (GhostCharacter->GetCameraBoom()->TargetArmLength + TraceAreaBoxSize.X / 2.5));
 
     // Define the trace box
-    // depth, width, height
-    FVector BoxExtent = FVector((WorldEnd - WorldEndBR).Size() / 2, 50, 100); // Half-size of the box
+    FVector BoxExtent = TraceAreaBoxSize / 2; // Half-size of the box
     FCollisionShape Box = FCollisionShape::MakeBox(BoxExtent);
 
+    // get box rotation in WorldDirectionCentr direction
     FQuat BoxRotation = FQuat(WorldDirectionCentr.Rotation());
-
+    
     // Assuming 'angle' is your rotation angle in degrees
-    float AngleInRadians = FMath::DegreesToRadians(-20);
+    float AngleInRadians = FMath::DegreesToRadians(TraceAreaBoxAngle);
 
-    // Create a quaternion representing the horizontal rotation around the Z-axis
-    FQuat HorizontalRotation = FQuat(BoxRotation.GetRotationAxis(), AngleInRadians);
+    // get right axix of the box
+    FVector BoxRightVector = FVector::CrossProduct(WorldDirectionCentr.GetSafeNormal(), FVector::UpVector);
+    // Draw the right vector of the box
+    //DrawDebugLine(GetWorld(), WorldEndCentr, WorldEndCentr + BoxRightVector * BoxExtent.Size(), FColor::Red, false, 2.0f, 0, 5);
+
+    // Create a quaternion representing the horizontal rotation around the right axis
+    FQuat HorizontalRotation = FQuat(BoxRightVector, AngleInRadians);
 
     // Combine with the existing BoxRotation
-    FQuat BoxRotation2 = FQuat(BoxRotation.Vector(), FMath::DegreesToRadians(-20));
-
-    FVector PlayerLocation = GhostCharacter->GetActorLocation();
+    BoxRotation = HorizontalRotation * BoxRotation;
 
     // Perform the box trace
     TArray<FHitResult> HitResults;
@@ -73,8 +70,8 @@ void AGhostController::GetActorsInScreenArea()
 
     // Draw the debug box
     DrawDebugBox(GetWorld(), WorldEndCentr, BoxExtent, BoxRotation, FColor::Green, false, 1.0f, 0, 5);
-    DrawDebugBox(GetWorld(), WorldEndCentr, BoxExtent, BoxRotation2, FColor::Blue, false, 1.0f, 0, 5);
-    //DrawDebugLine(GetWorld(), PlayerLocation, PlayerLocation + WorldDirectionCentr * BoxExtent.Size() * 2, FColor::Red, false, 2.0f, 0, 5);
+    // draw line from the player to end of the box
+    //DrawDebugLine(GetWorld(), GhostCharacter->GetActorLocation(), GhostCharacter->GetActorLocation() + WorldDirectionCentr * BoxExtent.Size() * 2, FColor::Red, false, 2.0f, 0, 5);
 
     // Process hit results
     for (const FHitResult& Hit : HitResults.FilterByPredicate(
