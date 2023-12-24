@@ -55,6 +55,14 @@ void AVillagerAIController::BeginPlay()
         // Register the perception component
         SetPerceptionComponent(*AIPerceptionComp);
     }
+
+    if(APawn* OwnerPawn = GetPawn())
+    {
+        if (BlackboardComp)
+        {
+            BlackboardComp->SetValueAsVector("OriginLocation", OwnerPawn->GetActorLocation());
+        }
+    }
 }
 
 void AVillagerAIController::OnPossess(APawn* InPawn)
