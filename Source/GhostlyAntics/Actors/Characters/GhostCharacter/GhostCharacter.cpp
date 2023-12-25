@@ -10,6 +10,8 @@
 #include "GameFramework/SpringArmComponent.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
+#include <NavModifierComponent.h>
+#include "NavigationSystem.h"
 #include "../../InteractableItems/InteractableItemPawn.h"
 #include "../../../Controllers/GhostController.h"
 
@@ -26,6 +28,10 @@ AGhostCharacter::AGhostCharacter()
 	FollowCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("FollowCamera"));
 	FollowCamera->SetupAttachment(CameraBoom, USpringArmComponent::SocketName); // Attach the camera to the end of the boom and let the boom adjust to match the controller orientation
 	FollowCamera->bUsePawnControlRotation = false; // Camera does not rotate relative to arm
+
+	NavModifier = CreateDefaultSubobject<UNavModifierComponent>(TEXT("NavModifier"));
+    NavModifier->RegisterComponent();
+    NavModifier->FailsafeExtent = FVector(50.0f, 50.0f, 100.0f);
 
 	OverlappedInteractableItem = nullptr;
 }
@@ -44,14 +50,12 @@ void AGhostCharacter::BeginPlay()
 			Subsystem->AddMappingContext(DefaultMappingContext, 0);
 		}
 	}
-
 }
 
 // Called every frame
 void AGhostCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
 }
 
 void AGhostCharacter::SetCurrentInteractable(IInteractInterface* NewInteractable)
