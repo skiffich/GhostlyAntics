@@ -31,7 +31,6 @@ UBTTask_WalkToPoint::UBTTask_WalkToPoint()
 void UBTTask_WalkToPoint::TickTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, float DeltaSeconds)
 {
     Super::TickTask(OwnerComp, NodeMemory, DeltaSeconds);
-    UE_LOG(LogTemp, Display, TEXT("TickTask"));
 
     if (CVarDrawAIDestinationPoint.GetValueOnAnyThread() == 1 && ExecutionResult == EBTNodeResult::Type::InProgress)
     {
@@ -120,7 +119,6 @@ EBTNodeResult::Type UBTTask_WalkToPoint::PerformMoveTask(UBehaviorTreeComponent&
 
 bool UBTTask_WalkToPoint::GetRandomPointInRadius(const UBehaviorTreeComponent& OwnerComp)
 {
-    UE_LOG(LogTemp, Display, TEXT("GetRandomPointInRadius"));
     if (AAIController* AIController = OwnerComp.GetAIOwner())
     {
         if (UNavigationSystemV1* NavSys = FNavigationSystem::GetCurrent<UNavigationSystemV1>(AIController->GetWorld()))

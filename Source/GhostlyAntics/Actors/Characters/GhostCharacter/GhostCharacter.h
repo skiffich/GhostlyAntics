@@ -24,7 +24,7 @@ class GHOSTLYANTICS_API AGhostCharacter : public AGACharacter
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
 	class UCameraComponent* FollowCamera;
 	
-	/** MappingContext */
+	/** NavModifier */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Navigation, meta = (AllowPrivateAccess = "true"))
 	class UNavModifierComponent* NavModifier;
 

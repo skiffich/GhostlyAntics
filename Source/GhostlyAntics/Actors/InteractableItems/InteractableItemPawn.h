@@ -55,8 +55,17 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Interaction")
 	float HardInteractionTime;
 
+	/* UI Interaction Widget */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "UI")
 	UWidgetComponent* InteractionWidgetComponent;
+
+	/** UI Interaction Widget offset */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "UI", meta = (AllowPrivateAccess = "true"))
+	float InteractionWidgetOffsetAboveMesh { 100.0f };
+
+	/** NavModifier */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Navigation, meta = (AllowPrivateAccess = "true"))
+	class UNavModifierComponent* NavModifier;
 
 protected:
 	// Called when the game starts or when spawned

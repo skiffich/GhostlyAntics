@@ -1,9 +1,10 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "../InteractableItems/InteractableItemPawn.h"
-#include "../Characters/GhostCharacter/GhostCharacter.h"
 #include "../../UI/Widgets/IteractibleItemUI.h"
+#include "../Characters/GhostCharacter/GhostCharacter.h"
+#include "../InteractableItems/InteractableItemPawn.h"
+#include <NavModifierComponent.h>
 
 
 // Sets default values
@@ -17,6 +18,9 @@ AInteractableItemPawn::AInteractableItemPawn()
     RootComponent = StaticMesh;
 
     AudioComponent = CreateDefaultSubobject<UAudioComponent>(TEXT("AudioComponent"));
+
+    NavModifier = CreateDefaultSubobject<UNavModifierComponent>(TEXT("NavModifier"));
+    NavModifier->RegisterComponent();
 
     InteractionWidgetComponent = CreateDefaultSubobject<UWidgetComponent>(TEXT("Interaction Widget Component"));
     InteractionWidgetComponent->SetupAttachment(RootComponent);
@@ -42,15 +46,14 @@ void AInteractableItemPawn::BeginPlay()
         InteractibleWidget = Cast<UIteractibleItemUI>(Widget);
     }
 
-    // Adjust these values as needed for correct positioning
-    float OffsetAboveMesh = 100.0f; // Example offset
-
     // During initialization or after the static mesh has been configured
     FVector MeshBounds = StaticMesh->Bounds.BoxExtent;
-    FVector WidgetPosition = FVector(0.0f, 0.0f, MeshBounds.Z + OffsetAboveMesh);
+    FVector WidgetPosition = FVector(0.0f, 0.0f, MeshBounds.Z + InteractionWidgetOffsetAboveMesh);
     InteractionWidgetComponent->SetRelativeLocation(WidgetPosition);
 	
     InteractionState = EInteractionState::Ready;
+
+    NavModifier->FailsafeExtent = MeshBounds;
 }
 
 void AInteractableItemPawn::BeginInteract()
