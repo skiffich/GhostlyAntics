@@ -15,11 +15,10 @@ AVillagerAIController::AVillagerAIController()
 
     // Initialize the sight configuration
     SightConfig = CreateDefaultSubobject<UAISenseConfig_Sight>(TEXT("SightConfig"));
-    SightConfig->SightRadius = 700.0f;
-    SightConfig->LoseSightRadius = SightConfig->SightRadius + 50.0f;
-    SightConfig->PeripheralVisionAngleDegrees = 70.0f;
-    SightConfig->SetMaxAge(5.0f);
-    SightConfig->AutoSuccessRangeFromLastSeenLocation = 520.0f;
+    SightConfig->SightRadius = 900.0f;
+    SightConfig->LoseSightRadius = SightConfig->SightRadius + 100.0f;
+    SightConfig->PeripheralVisionAngleDegrees = 60.0f;
+    SightConfig->AutoSuccessRangeFromLastSeenLocation = -1.0f;
     SightConfig->DetectionByAffiliation.bDetectEnemies = true;
     SightConfig->DetectionByAffiliation.bDetectFriendlies = true;
     SightConfig->DetectionByAffiliation.bDetectNeutrals = true;
