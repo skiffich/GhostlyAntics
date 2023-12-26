@@ -12,6 +12,20 @@ AVillageResident::AVillageResident()
 	AIControllerClass = AVillagerAIController::StaticClass();
 
 	GetCharacterMovement()->MaxWalkSpeed = 100.f;
+	GetCharacterMovement()->bOrientRotationToMovement = false;
+	GetCharacterMovement()->bUseControllerDesiredRotation = true;
+
+	VillagerState = EVillagerState::None;
+}
+
+bool AVillageResident::DoesWantToTalk()
+{
+	return !IsBusy() && FMath::RandRange(0.0f, 1.0f) < ChanceToTalk;
+}
+
+bool AVillageResident::IsBusy()
+{
+	return VillagerState != EVillagerState::None && VillagerState != EVillagerState::Walking;
 }
 
 // Called when the game starts or when spawned

@@ -1,9 +1,9 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
+#include "../InteractableItems/InteractableItemPawn.h"
 #include "../../UI/Widgets/IteractibleItemUI.h"
 #include "../Characters/GhostCharacter/GhostCharacter.h"
-#include "../InteractableItems/InteractableItemPawn.h"
 #include <NavModifierComponent.h>
 
 

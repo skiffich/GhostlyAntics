@@ -4,12 +4,7 @@
 #include "../../AI/Tasks/BTTask_WalkToPoint.h"
 #include "../VillagerAIController.h"
 #include "AIController.h"
-#include "AISystem.h"
-#include "BehaviorTree/Blackboard/BlackboardKeyType_Object.h"
-#include "BehaviorTree/Blackboard/BlackboardKeyType_Vector.h"
 #include "BehaviorTree/BlackboardComponent.h"
-#include "GameFramework/Actor.h"
-#include "Navigation/PathFollowingComponent.h"
 #include "NavigationSystem.h"
 #include "Tasks/AITask_MoveTo.h"
 #include "VisualLogger/VisualLogger.h"
@@ -35,24 +30,28 @@ void UBTTask_WalkToPoint::TickTask(UBehaviorTreeComponent& OwnerComp, uint8* Nod
     if (CVarDrawAIDestinationPoint.GetValueOnAnyThread() == 1 && ExecutionResult == EBTNodeResult::Type::InProgress)
     {
         DrawDebugSphere(GetWorld(), DestinationLocation, 25.0f, 12, FColor::Green, false, TickTime + TickTime * 0.1);
-        SetNextTickTime(NodeMemory, TickTime);
     }
-    else
+
+    if (AAIController* AIController = OwnerComp.GetAIOwner())
     {
-        bNotifyTick = false;
-        bTickIntervals = false;
+        if (UBlackboardComponent* BlackboardComp = AIController->GetBlackboardComponent())
+        {
+            if (BlackboardComp->GetValueAsBool("InviteToTalk"))
+            {
+                FinishLatentTask(OwnerComp, EBTNodeResult::Failed);
+            }
+        }
     }
+
+    SetNextTickTime(NodeMemory, TickTime);
 }
 
 
 EBTNodeResult::Type UBTTask_WalkToPoint::PerformMoveTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)
 {
-    if (CVarDrawAIDestinationPoint.GetValueOnAnyThread() == 1)
-    {
-        bNotifyTick = true;
-        bTickIntervals = true;
-        SetNextTickTime(NodeMemory, 0.01);
-    }
+    bNotifyTick = true;
+    bTickIntervals = true;
+    SetNextTickTime(NodeMemory, 0.01);
 
     FBTMoveToTaskMemory* MyMemory = CastInstanceNodeMemory<FBTMoveToTaskMemory>(NodeMemory);
     AAIController* MyController = OwnerComp.GetAIOwner();

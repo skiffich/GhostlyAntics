@@ -2,6 +2,7 @@
 
 
 #include "../AI/VillagerAIController.h"
+#include "../Actors/Characters/VillageResident/VillageResident.h"
 #include "../Actors/InteractableItems/InteractableItemPawn.h"
 
 AVillagerAIController::AVillagerAIController()
@@ -82,27 +83,36 @@ void AVillagerAIController::OnPossess(APawn* InPawn)
 
 void AVillagerAIController::OnPerceptionUpdated(AActor* Actor, FAIStimulus Stimulus)
 {
-    if (Stimulus.WasSuccessfullySensed())
+    if (AVillageResident* villager = Cast<AVillageResident>(Actor))
     {
-        if (Stimulus.Type == UAISense::GetSenseID<UAISense_Sight>())
+        if (Stimulus.WasSuccessfullySensed() && Stimulus.Type == UAISense::GetSenseID<UAISense_Sight>())
         {
-            UE_LOG(LogTemp, Warning, TEXT("Actor %s was seen"), *Actor->GetName());
+                UE_LOG(LogTemp, Display, TEXT("villager %s see %s"), *GetPawn()->GetName(), *Actor->GetName());
+                if (BlackboardComp)
+                {
+                    if (villager->DoesWantToTalk())
+                    {
 
-            if (BlackboardComp)
+                        UE_LOG(LogTemp, Display, TEXT("villager %s want to talk to %s"), *GetPawn()->GetName(), *Actor->GetName());
+                        BlackboardComp->SetValueAsBool("InviteToTalk", true);
+                        BlackboardComp->SetValueAsObject("IterestingPawn", Actor);
+                        BlackboardComp->SetValueAsVector("IterestingLocation", Actor->GetActorLocation());
+                    }
+                }
+                else
+                {
+                    BlackboardComp->SetValueAsBool("InviteToTalk", false);
+                }
+                /**/
+            /*else if (Stimulus.Type == UAISense::GetSenseID<UAISense_Hearing>())
             {
-                FVector Location = Stimulus.StimulusLocation;
-                BlackboardComp->SetValueAsVector("StimulusLocation", Location);
-            }
+                UE_LOG(LogTemp, Warning, TEXT("Actor %s was heard"), *Actor->GetName());
+            }*/
         }
-        else if (Stimulus.Type == UAISense::GetSenseID<UAISense_Hearing>())
+        else if (Stimulus.Type == UAISense::GetSenseID<UAISense_Sight>())
         {
-            UE_LOG(LogTemp, Warning, TEXT("Actor %s was heard"), *Actor->GetName());
-        }
-
-        if (AInteractableItemPawn* item = Cast<AInteractableItemPawn>(Actor))
-        {
-            UE_LOG(LogTemp, Warning, TEXT("InteractableItem %s was detected"), *Actor->GetName());
-
+            UE_LOG(LogTemp, Display, TEXT("villager %s lost %s"), *GetPawn()->GetName(), *Actor->GetName());
+            BlackboardComp->SetValueAsBool("InviteToTalk", false);
         }
     }
 }
