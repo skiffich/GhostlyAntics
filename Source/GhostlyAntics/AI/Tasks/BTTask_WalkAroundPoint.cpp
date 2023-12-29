@@ -1,7 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "../../AI/Tasks/BTTask_WalkToPoint.h"
+#include "BTTask_WalkAroundPoint.h"
 #include "../VillagerAIController.h"
 #include "AIController.h"
 #include "BehaviorTree/BlackboardComponent.h"
@@ -18,12 +18,12 @@ static TAutoConsoleVariable<int32> CVarDrawAIDestinationPoint(
     TEXT("1: Draw debug AI Destination Point"),
     ECVF_Cheat);
 
-UBTTask_WalkToPoint::UBTTask_WalkToPoint()
+UBTTask_WalkAroundPoint::UBTTask_WalkAroundPoint()
 {
-    NodeName = TEXT("BTTask_WalkToPoint");
+	NodeName = TEXT("Walk Around Point");
 }
 
-void UBTTask_WalkToPoint::TickTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, float DeltaSeconds)
+void UBTTask_WalkAroundPoint::TickTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, float DeltaSeconds)
 {
     Super::TickTask(OwnerComp, NodeMemory, DeltaSeconds);
 
@@ -46,8 +46,7 @@ void UBTTask_WalkToPoint::TickTask(UBehaviorTreeComponent& OwnerComp, uint8* Nod
     SetNextTickTime(NodeMemory, TickTime);
 }
 
-
-EBTNodeResult::Type UBTTask_WalkToPoint::PerformMoveTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)
+EBTNodeResult::Type UBTTask_WalkAroundPoint::PerformMoveTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)
 {
     bNotifyTick = true;
     bTickIntervals = true;
@@ -116,7 +115,7 @@ EBTNodeResult::Type UBTTask_WalkToPoint::PerformMoveTask(UBehaviorTreeComponent&
     return NodeResult;
 }
 
-bool UBTTask_WalkToPoint::GetRandomPointInRadius(const UBehaviorTreeComponent& OwnerComp)
+bool UBTTask_WalkAroundPoint::GetRandomPointInRadius(const UBehaviorTreeComponent& OwnerComp)
 {
     if (AAIController* AIController = OwnerComp.GetAIOwner())
     {
