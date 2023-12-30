@@ -11,7 +11,7 @@ enum class EVillagerState : uint8
 {
 	None UMETA(DisplayName = "None"),
 	Walking UMETA(DisplayName = "Walking"),
-	Looking UMETA(DisplayName = "Looking"),
+	TalkingRequest UMETA(DisplayName = "TalkingRequest"),
 	Talking UMETA(DisplayName = "Talking")
 };
 
@@ -21,16 +21,40 @@ class GHOSTLYANTICS_API AVillageResident : public AGACharacter
 	GENERATED_BODY()
 
 	/** Chance to talk */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "UI", meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Talking", meta = (AllowPrivateAccess = "true"))
 	float ChanceToTalk { 0.5f };
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Talking", meta = (AllowPrivateAccess = "true"))
+	TArray<TObjectPtr<UAnimationAsset>> TalkingAnimations;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Talking", meta = (AllowPrivateAccess = "true"))
+	TArray<TObjectPtr<UAnimationAsset>> InviteToTalkAnimations;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Talking", meta = (AllowPrivateAccess = "true"))
+	TArray<TObjectPtr<USoundCue>> TalkingSounds;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Talking", meta = (AllowPrivateAccess = "true"))
+	USoundCue* SoundInviteTalking;
 
 public:
 	// Sets default values for this character's properties
 	AVillageResident();
 
-	bool DoesWantToTalk();
+	FORCEINLINE bool DoesWantToTalk();
 
-	bool IsBusy();
+	FORCEINLINE bool IsBusy();
+
+	UFUNCTION(BlueprintPure, Category = "Talking")
+	FORCEINLINE bool IsTalking() { return VillagerState == EVillagerState::Talking;	}
+
+	bool RequestConversation(AVillageResident* initiator, AVillageResident* responder);
+
+	void StartTalking();
+	void FinishTalking();
+private:
+	FTimerDelegate TalkingTimerDelegate;
+	FTimerHandle TalkingTimerHandle;
+	FDelegateHandle VillagerPathMoveToDelegate;;
 
 protected:
 

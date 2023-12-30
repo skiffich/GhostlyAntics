@@ -35,17 +35,13 @@ AVillagerAIController::AVillagerAIController()
     AIPerceptionComp->ConfigureSense(*SightConfig);
     AIPerceptionComp->ConfigureSense(*HearingConfig);
     AIPerceptionComp->OnTargetPerceptionUpdated.AddDynamic(this, &AVillagerAIController::OnPerceptionUpdated);
+
+    SetVillagerAIState(EVillagerAIState::None);
 }
 
 void AVillagerAIController::BeginPlay()
 {
     Super::BeginPlay();
-
-    if (IsValid(BehaviorTree))
-    {
-        RunBehaviorTree(BehaviorTree);
-        BehaviorComp->StartTree(*BehaviorTree);
-    }
 
     if (IsValid(AIPerceptionComp)) 
     {
@@ -55,14 +51,6 @@ void AVillagerAIController::BeginPlay()
         // Register the perception component
         SetPerceptionComponent(*AIPerceptionComp);
     }
-
-    if(APawn* OwnerPawn = GetPawn())
-    {
-        if (BlackboardComp)
-        {
-            BlackboardComp->SetValueAsVector("OriginLocation", OwnerPawn->GetActorLocation());
-        }
-    }
 }
 
 void AVillagerAIController::OnPossess(APawn* InPawn)
@@ -70,49 +58,56 @@ void AVillagerAIController::OnPossess(APawn* InPawn)
     Super::OnPossess(InPawn);
 
     // Initialize the blackboard and start the behavior tree when the AI possesses a pawn
-    if (IsValid(BlackboardComp) && IsValid(BehaviorTree))
+    if (IsValid(BlackboardComp) && IsValid(BehaviorTree) && IsValid(BehaviorComp))
     {
         BlackboardComp->InitializeBlackboard(*(BehaviorTree->BlackboardAsset));
 
-        if (IsValid(BehaviorComp))
+        if (IsValid(InPawn))
         {
-            BehaviorComp->StartTree(*BehaviorTree);
+            BlackboardComp->SetValueAsVector("OriginLocation", InPawn->GetActorLocation());
         }
+        else
+        {
+            BlackboardComp->SetValueAsVector("OriginLocation", FVector(.0f, .0f, .0f));
+        }
+
+        BehaviorComp->StartTree(*BehaviorTree);
+
+        SetVillagerAIState(EVillagerAIState::Walking);
     }
 }
 
 void AVillagerAIController::OnPerceptionUpdated(AActor* Actor, FAIStimulus Stimulus)
 {
-    if (AVillageResident* villager = Cast<AVillageResident>(Actor))
+    if (AVillageResident* Villager = Cast<AVillageResident>(Actor))
     {
         if (Stimulus.WasSuccessfullySensed() && Stimulus.Type == UAISense::GetSenseID<UAISense_Sight>())
         {
-                UE_LOG(LogTemp, Display, TEXT("villager %s see %s"), *GetPawn()->GetName(), *Actor->GetName());
-                if (BlackboardComp)
-                {
-                    if (villager->DoesWantToTalk())
-                    {
-
-                        UE_LOG(LogTemp, Display, TEXT("villager %s want to talk to %s"), *GetPawn()->GetName(), *Actor->GetName());
-                        BlackboardComp->SetValueAsBool("InviteToTalk", true);
-                        BlackboardComp->SetValueAsObject("IterestingPawn", Actor);
-                        BlackboardComp->SetValueAsVector("IterestingLocation", Actor->GetActorLocation());
-                    }
-                }
-                else
-                {
-                    BlackboardComp->SetValueAsBool("InviteToTalk", false);
-                }
-                /**/
-            /*else if (Stimulus.Type == UAISense::GetSenseID<UAISense_Hearing>())
+            if (AVillageResident* CurrentPawn = Cast<AVillageResident>(GetPawn()))
             {
-                UE_LOG(LogTemp, Warning, TEXT("Actor %s was heard"), *Actor->GetName());
-            }*/
+                if (CurrentPawn->DoesWantToTalk())
+                {
+                    CurrentPawn->RequestConversation(CurrentPawn, Villager);
+                }
+            }
         }
-        else if (Stimulus.Type == UAISense::GetSenseID<UAISense_Sight>())
-        {
-            UE_LOG(LogTemp, Display, TEXT("villager %s lost %s"), *GetPawn()->GetName(), *Actor->GetName());
-            BlackboardComp->SetValueAsBool("InviteToTalk", false);
-        }
+    }
+}
+
+void AVillagerAIController::BeginTalkingWith(APawn* PawnToTalkWith)
+{
+    if (IsValid(BlackboardComp))
+    {
+        BlackboardComp->SetValueAsVector("TargetLocation", PawnToTalkWith->GetActorLocation());
+        SetVillagerAIState(EVillagerAIState::Talking);
+    }
+}
+
+void AVillagerAIController::SetVillagerAIState(EVillagerAIState newState)
+{
+    VillagerAIState = newState;
+    if (IsValid(BlackboardComp))
+    {
+        BlackboardComp->SetValueAsEnum("VillagerAIState", static_cast<uint8>(newState));
     }
 }

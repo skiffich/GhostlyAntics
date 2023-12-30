@@ -19,12 +19,6 @@ public:
 
 protected:
 
-	// To add mapping context
-	virtual void BeginPlay();
-
-	// Called every frame
-	virtual void Tick(float DeltaTime) override;
-
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Audio")
 	UAudioComponent* AudioComponent;
 };

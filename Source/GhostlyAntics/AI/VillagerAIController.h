@@ -15,6 +15,16 @@
 /**
  * 
  */
+
+UENUM(BlueprintType)
+enum class EVillagerAIState : uint8
+{
+    None UMETA(DisplayName = "None"),
+    Walking UMETA(DisplayName = "Walking"),
+    Talking UMETA(DisplayName = "Talking")
+};
+
+
 UCLASS()
 class GHOSTLYANTICS_API AVillagerAIController : public AAIController
 {
@@ -56,4 +66,12 @@ protected:
 
     UFUNCTION()
     void OnPerceptionUpdated(AActor* Actor, FAIStimulus Stimulus);
+
+public:
+    void BeginTalkingWith(APawn* PawnToTalkWith);
+
+    void SetVillagerAIState(EVillagerAIState newState);
+
+private:
+    EVillagerAIState VillagerAIState;
 };

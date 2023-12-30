@@ -35,24 +35,3 @@ AGACharacter::AGACharacter()
 	AudioComponent = CreateDefaultSubobject<UAudioComponent>(TEXT("AudioComponent"));
 	AudioComponent->SetupAttachment(RootComponent);
 }
-
-// Called when the game starts or when spawned
-void AGACharacter::BeginPlay()
-{
-	// Call the base class  
-	Super::BeginPlay();
-
-	//Add Input Mapping Context
-	if (APlayerController* PlayerController = Cast<APlayerController>(Controller))
-	{
-		
-	}
-	
-}
-
-// Called every frame
-void AGACharacter::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
-
-}
