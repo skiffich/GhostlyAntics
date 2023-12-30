@@ -4,6 +4,8 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
+#include "Sound/SoundCue.h"
+#include "Components/AudioComponent.h"
 #include "GACharacter.generated.h"
 
 UCLASS()
@@ -22,4 +24,7 @@ protected:
 
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Audio")
+	UAudioComponent* AudioComponent;
 };
