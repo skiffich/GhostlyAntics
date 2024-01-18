@@ -18,6 +18,7 @@ AVillageResident::AVillageResident()
 	GetCharacterMovement()->MaxWalkSpeed = 100.f;
 	GetCharacterMovement()->bOrientRotationToMovement = false;
 	GetCharacterMovement()->bUseControllerDesiredRotation = true;
+	GetCharacterMovement()->bUseRVOAvoidance = true;
 
 	VillagerState = EVillagerState::None;
 
