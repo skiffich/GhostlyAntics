@@ -11,7 +11,7 @@ public class GhostlyAntics : ModuleRules
 		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "EnhancedInput", "GameplayTasks", "UMG" });
 
 		// AI Dependencies
-		PrivateDependencyModuleNames.AddRange(new string[] { "AIModule", "NavigationSystem" });
+		PrivateDependencyModuleNames.AddRange(new string[] { "AIModule", "NavigationSystem", "StateTreeModule", "GameplayStateTreeModule" });
 		
 		// Uncomment if you are using online features
 		// PrivateDependencyModuleNames.Add("OnlineSubsystem");

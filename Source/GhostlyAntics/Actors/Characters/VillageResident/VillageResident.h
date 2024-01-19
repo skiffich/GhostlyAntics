@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "../../Characters/GACharacter/GACharacter.h"
+#include "../Plugins/Runtime/GameplayStateTree/Source/GameplayStateTreeModule/Public/Components/StateTreeComponent.h"
 #include "VillageResident.generated.h"
 
 UENUM(BlueprintType)
@@ -20,9 +21,22 @@ class GHOSTLYANTICS_API AVillageResident : public AGACharacter
 {
 	GENERATED_BODY()
 
+protected:
+	UPROPERTY(EditDefaultsOnly, meta = (category = "AI"))
+	UStateTreeComponent* StateTree;
+
+	UPROPERTY(EditAnywhere, meta = (category = "Mesh"))
+	USkeletalMeshComponent* VillagerMesh;
+
 public:
 	// Sets default values for this character's properties
 	AVillageResident();
+
+	UFUNCTION(BlueprintCallable, BlueprintPure)
+	FORCEINLINE EVillagerState GetState() { return VillagerState; }
+
+	UFUNCTION(BlueprintCallable)
+	FVector GetPointToWanderAround();
 
 protected:
 	// To add mapping context
@@ -32,5 +46,8 @@ protected:
 	virtual void Tick(float DeltaTime) override;
 
 private:
+	UPROPERTY(VisibleInstanceOnly)
 	EVillagerState VillagerState;
+
+	FVector SpawnPoint;
 };

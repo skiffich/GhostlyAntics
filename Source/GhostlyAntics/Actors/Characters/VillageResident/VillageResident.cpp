@@ -20,16 +20,32 @@ AVillageResident::AVillageResident()
 	GetCharacterMovement()->bUseControllerDesiredRotation = true;
 	GetCharacterMovement()->bUseRVOAvoidance = true;
 
+	StateTree = CreateDefaultSubobject<UStateTreeComponent>(TEXT("State Tree"));
+
+	VillagerMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("Villager Mesh"));
+	VillagerMesh->SetupAttachment(Super::GetMesh());
+	VillagerMesh->SetRelativeLocation(FVector(.0f, .0f, -GetCapsuleComponent()->GetScaledCapsuleHalfHeight()));
+
+	Super::GetMesh()->SetVisibility(false);
+	Super::GetMesh()->VisibilityBasedAnimTickOption = EVisibilityBasedAnimTickOption::AlwaysTickPoseAndRefreshBones;
+
 	VillagerState = EVillagerState::None;
+}
+
+FVector AVillageResident::GetPointToWanderAround()
+{
+	return SpawnPoint;
 }
 
 // Called when the game starts or when spawned
 void AVillageResident::BeginPlay()
 {
+	VillagerState = EVillagerState::Walking;
+
+	SpawnPoint = GetActorLocation();
+
 	// Call the base class  
 	Super::BeginPlay();
-
-	VillagerState = EVillagerState::Walking;
 }
 
 // Called every frame
