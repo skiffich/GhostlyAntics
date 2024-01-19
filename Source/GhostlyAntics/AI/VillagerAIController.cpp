@@ -7,10 +7,6 @@
 
 AVillagerAIController::AVillagerAIController()
 {
-    // Initialize the BehaviorTreeComponent, BlackboardComponent and the corresponding key
-    BehaviorComp = CreateDefaultSubobject<UBehaviorTreeComponent>(TEXT("BehaviorComp"));
-    BlackboardComp = CreateDefaultSubobject<UBlackboardComponent>(TEXT("BlackboardComp"));
-
     // Initialize the perception component
     AIPerceptionComp = CreateDefaultSubobject<UAIPerceptionComponent>(TEXT("AIPerceptionComp"));
 
@@ -53,61 +49,17 @@ void AVillagerAIController::BeginPlay()
     }
 }
 
-void AVillagerAIController::OnPossess(APawn* InPawn)
-{
-    Super::OnPossess(InPawn);
-
-    // Initialize the blackboard and start the behavior tree when the AI possesses a pawn
-    if (IsValid(BlackboardComp) && IsValid(BehaviorTree) && IsValid(BehaviorComp))
-    {
-        BlackboardComp->InitializeBlackboard(*(BehaviorTree->BlackboardAsset));
-
-        if (IsValid(InPawn))
-        {
-            BlackboardComp->SetValueAsVector("OriginLocation", InPawn->GetActorLocation());
-        }
-        else
-        {
-            BlackboardComp->SetValueAsVector("OriginLocation", FVector(.0f, .0f, .0f));
-        }
-
-        BehaviorComp->StartTree(*BehaviorTree);
-
-        SetVillagerAIState(EVillagerAIState::Walking);
-    }
-}
-
 void AVillagerAIController::OnPerceptionUpdated(AActor* Actor, FAIStimulus Stimulus)
 {
     if (AVillageResident* Villager = Cast<AVillageResident>(Actor))
     {
         if (Stimulus.WasSuccessfullySensed() && Stimulus.Type == UAISense::GetSenseID<UAISense_Sight>())
         {
-            if (AVillageResident* CurrentPawn = Cast<AVillageResident>(GetPawn()))
-            {
-                if (CurrentPawn->DoesWantToTalk())
-                {
-                    CurrentPawn->RequestConversation(CurrentPawn, Villager);
-                }
-            }
         }
-    }
-}
-
-void AVillagerAIController::BeginTalkingWith(APawn* PawnToTalkWith)
-{
-    if (IsValid(BlackboardComp))
-    {
-        BlackboardComp->SetValueAsVector("TargetLocation", PawnToTalkWith->GetActorLocation());
-        SetVillagerAIState(EVillagerAIState::Talking);
     }
 }
 
 void AVillagerAIController::SetVillagerAIState(EVillagerAIState newState)
 {
     VillagerAIState = newState;
-    if (IsValid(BlackboardComp))
-    {
-        BlackboardComp->SetValueAsEnum("VillagerAIState", static_cast<uint8>(newState));
-    }
 }
