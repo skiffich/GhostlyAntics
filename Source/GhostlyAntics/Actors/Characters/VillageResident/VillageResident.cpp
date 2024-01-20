@@ -7,6 +7,9 @@
 #include "Sound/SoundAttenuation.h"
 #include "Components/CapsuleComponent.h"
 #include "Navigation/PathFollowingComponent.h"
+#include "Kismet/KismetSystemLibrary.h"
+#include "../../../AI/VillagerPath.h"
+#include "Components/SplineMeshComponent.h"
 #include <functional>
 
 
@@ -32,15 +35,10 @@ AVillageResident::AVillageResident()
 	VillagerState = EVillagerState::None;
 }
 
-FVector AVillageResident::GetPointToWanderAround()
-{
-	return SpawnPoint;
-}
-
 // Called when the game starts or when spawned
 void AVillageResident::BeginPlay()
 {
-	VillagerState = EVillagerState::Walking;
+	VillagerState = EVillagerState::WalkingAroundLocation;
 
 	SpawnPoint = GetActorLocation();
 

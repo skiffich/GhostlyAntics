@@ -5,13 +5,15 @@
 #include "CoreMinimal.h"
 #include "../../Characters/GACharacter/GACharacter.h"
 #include "../Plugins/Runtime/GameplayStateTree/Source/GameplayStateTreeModule/Public/Components/StateTreeComponent.h"
+#include "Components/SplineComponent.h"
 #include "VillageResident.generated.h"
 
 UENUM(BlueprintType)
 enum class EVillagerState : uint8
 {
 	None UMETA(DisplayName = "None"),
-	Walking UMETA(DisplayName = "Walking"),
+	WalkingAroundLocation UMETA(DisplayName = "WalkingAroundLocation"),
+	WalkingALongSpline UMETA(DisplayName = "WalkingALongSpline"),
 	TalkingRequest UMETA(DisplayName = "TalkingRequest"),
 	Talking UMETA(DisplayName = "Talking")
 };
@@ -34,9 +36,6 @@ public:
 
 	UFUNCTION(BlueprintCallable, BlueprintPure)
 	FORCEINLINE EVillagerState GetState() { return VillagerState; }
-
-	UFUNCTION(BlueprintCallable)
-	FVector GetPointToWanderAround();
 
 protected:
 	// To add mapping context
