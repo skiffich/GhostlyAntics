@@ -8,7 +8,7 @@ public class GhostlyAntics : ModuleRules
 	{
 		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 	
-		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "EnhancedInput", "GameplayTasks", "UMG" });
+		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "EnhancedInput", "GameplayTasks", "UMG", "GameplayTags" });
 
 		// AI Dependencies
 		PrivateDependencyModuleNames.AddRange(new string[] { "AIModule", "NavigationSystem", "StateTreeModule", "GameplayStateTreeModule" });
