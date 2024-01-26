@@ -68,6 +68,9 @@ void AVillagerPath::AddSplineMesh()
         NewSplineMesh->SetEndScale(FVector2D(PathWidthScale, 1.0f));
         NewSplineMesh->SetVisibility(PathVisibility);
         NewSplineMesh->SetStartAndEnd(StartPos, StartTangent, EndPos, EndTangent);
+        NewSplineMesh->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+        NewSplineMesh->SetCollisionObjectType(ECollisionChannel::ECC_WorldStatic);
+        NewSplineMesh->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
         NewSplineMesh->RegisterComponent();
     }
 }

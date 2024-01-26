@@ -75,35 +75,9 @@ void AVillagerAIController::OnPossess(APawn* InPawn)
             Blackboard = BB;
 
             Blackboard->SetValueAsVector("WalkAroundPoint", Villager->GetActorLocation());
-            Blackboard->SetValueAsFloat("ChillFor", 5.0f);
 
             RunBehaviorTree(Tree);
         }
-    }
-}
-
-void AVillagerAIController::Tick(float DeltaTime)
-{
-    switch (VillagerState)
-    {
-    case EVillagerState::Chilling:
-        Energy += DeltaTime * 0.01;
-        Energy = FMath::Min(Energy, 1.0f);
-        break;
-    case EVillagerState::WalkingAround:
-        Energy -= DeltaTime * 0.005;
-        Energy = FMath::Max(Energy, 0.0f);
-        break;
-    case EVillagerState::WalkingAlongPath:
-        Energy -= DeltaTime * 0.005;
-        Energy = FMath::Max(Energy, 0.0f);
-        break;
-    case EVillagerState::Talking:
-        break;
-    case EVillagerState::Interacting:
-        break;
-    default:
-        break;
     }
 }
 
@@ -253,16 +227,14 @@ bool AVillagerAIController::IsThereVisiblePath() const
 
 EVillagerState AVillagerAIController::DecideWhatToDo() const
 {
-    UE_LOG(LogTemp, Display, TEXT("Energy = %f"), Energy);
     switch (GetStressState())
     {
     case EStressState::Calm:
-        if (UKismetMathLibrary::RandomBoolWithWeight(exp(-Energy)) && !(VillagerState == EVillagerState::WalkingAlongPath && GetCurrentStateDuration() < 30.0f))
+        if (UKismetMathLibrary::RandomBoolWithWeight(1.5 * exp(6 * -Energy)))
         {
-            Blackboard->SetValueAsFloat("ChillFor", (-FMath::Pow(Energy, 2) + 1.0f) * 10.0f);
             return EVillagerState::Chilling;
         }
-        if (IsThereVisiblePath() && ((Energy > 0.75f && FMath::RandBool()) || (VillagerState == EVillagerState::WalkingAlongPath && GetCurrentStateDuration() < 30.0f)))
+        if (Energy > 0.75f && IsThereVisiblePath())
         {
             return EVillagerState::WalkingAlongPath;
         }
