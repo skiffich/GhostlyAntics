@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "Components/SplineComponent.h"
+#include "Components/SplineMeshComponent.h"
 #include "VillagerPath.generated.h"
 
 UCLASS()
@@ -16,10 +17,25 @@ public:
 	// Sets default values for this actor's properties
 	AVillagerPath();
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	USplineComponent* Path;
+	UFUNCTION(BlueprintCallable, BlueprintPure)
+	USplineComponent* GetPathSpline() const;
+
+	UFUNCTION(BlueprintCallable, BlueprintPure)
+	float GetWidth() const;
 
 protected:
-	// Called when the game starts or when spawned
-	virtual void BeginPlay() override;
+	UFUNCTION(BlueprintCallable)
+	void AddSplineMesh();
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	USplineComponent* PathSpline;
+
+	UPROPERTY(EditInstanceOnly)
+	float PathWidthScale;
+
+	UPROPERTY(EditInstanceOnly)
+	bool PathVisibility;
+	
+private:
+	UStaticMesh* SplineMesh;
 };

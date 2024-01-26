@@ -8,6 +8,7 @@
 #include "Components/CapsuleComponent.h"
 #include "Navigation/PathFollowingComponent.h"
 #include "Kismet/KismetSystemLibrary.h"
+#include "Kismet/KismetMathLibrary.h"
 #include "../../../AI/VillagerPath.h"
 #include "Components/SplineMeshComponent.h"
 #include <functional>
@@ -37,16 +38,33 @@ AVillageResident::AVillageResident()
     TalkingSlot->SetRelativeRotation(FRotator(.0f, -90.0f, .0f));
     TalkingSlot->SetupAttachment(VillagerMesh);
 
-	VillagerState = EVillagerState::None;
+    SightRadius = 300.f;
+    Energy = FMath::RandRange(0.5, 1.0);
+    Intelligence = FMath::RandRange(0.5, 1.0);
+    Stress = FMath::RandRange(0.0, 0.2);
+
+	VillagerState = EVillagerState::Chilling;
 }
 
-TArray<USlotComponent*> AVillageResident::GetVisibleSlotsInRadius()
+void AVillageResident::SetState(EVillagerState newState)
 {
-	FTimespan NowTimeSpan = FTimespan::FromSeconds(FDateTime::Now().GetTimeOfDay().GetTotalSeconds());
-	if ((NowTimeSpan - LastFoundSlotsTimeSpan).GetTotalSeconds() < CheckSlotsPerSeconds)
-	{
-		return LastFoundSlots;
-	}
+    VillagerState = newState;
+    StateChangedTimeSpan = FTimespan::FromSeconds(FDateTime::Now().GetTimeOfDay().GetTotalSeconds());
+}
+
+double AVillageResident::GetCurrentStateDuration()
+{
+    FTimespan NowTimeSpan = FTimespan::FromSeconds(FDateTime::Now().GetTimeOfDay().GetTotalSeconds());
+    return (NowTimeSpan - StateChangedTimeSpan).GetTotalSeconds();
+}
+
+TArray<UPrimitiveComponent*> AVillageResident::GetVisibleComponents()
+{
+    FTimespan NowTimeSpan = FTimespan::FromSeconds(FDateTime::Now().GetTimeOfDay().GetTotalSeconds());
+    if ((NowTimeSpan - LastFoundComponentsTimeSpan).GetTotalSeconds() < CheckPeriod)
+    {
+        return LastFoundComponents;
+    }
 
     // Get the current location and forward vector of the actor
     FVector ActorLocation = GetActorLocation();
@@ -78,62 +96,133 @@ TArray<USlotComponent*> AVillageResident::GetVisibleSlotsInRadius()
     TArray<TEnumAsByte<EObjectTypeQuery>> ObjectTypes;
     ObjectTypes.Add(UEngineTypes::ConvertToObjectType(ECollisionChannel::ECC_WorldStatic));
 
-    // Define a filter for the component class, if needed
-    TSubclassOf<UActorComponent> ComponentFilter = USlotComponent::StaticClass();
-
     // Perform the sphere overlap components check
     bool bFoundComponents = UKismetSystemLibrary::SphereOverlapComponents(
         this,
         SphereCenter,
         SightRadius,
         ObjectTypes,
-        ComponentFilter,
+        nullptr,
         TArray<AActor*>{this}, // ignore current actor
         OverlappingComponents
     );
 
-    if (OverlappingComponents.Num() == 0)
-    {
-        return TArray<USlotComponent*>();
-    }
+    LastFoundComponents = OverlappingComponents;
 
-    LastFoundSlots.Empty();
+    return LastFoundComponents;
+}
+
+TArray<USlotComponent*> AVillageResident::GetVisibleSlots()
+{
+    TArray<USlotComponent*> Result;
+
+    TArray<UPrimitiveComponent*> OverlappingComponents = GetVisibleComponents();
 
     for (UPrimitiveComponent* Component : OverlappingComponents)
     {
         if (USlotComponent* Slot = Cast<USlotComponent>(Component))
         {
-            LastFoundSlots.Add(Slot);
-        }
-        else
-        {
-            return TArray<USlotComponent*>();
+            Result.Add(Slot);
         }
     }
 
-    LastFoundSlotsTimeSpan = FTimespan::FromSeconds(FDateTime::Now().GetTimeOfDay().GetTotalSeconds());
+	return Result;
+}
 
-	return TArray<USlotComponent*>();
+TArray<USlotComponent*> AVillageResident::GetVisibleTalkingSlots()
+{
+    TArray<USlotComponent*> VisibleSlots = GetVisibleSlots();
+
+    for (USlotComponent* Slot : VisibleSlots)
+    {
+        const FGameplayTag TalkingSlotTag = FGameplayTag::RequestGameplayTag(FName("Slots.Villager.TalkingSlot"));
+        if (!Slot->GameplayTags.HasTag(TalkingSlotTag))
+        {
+            VisibleSlots.Remove(Slot);
+        }
+    }
+
+    return VisibleSlots;
 }
 
 bool AVillageResident::IsThereVisibleTalkingSlot()
 {
-    TArray<USlotComponent*> VisibleSlots = GetVisibleSlotsInRadius();
+       return GetVisibleTalkingSlots().Num() > 0;
+}
 
-    return VisibleSlots.Num() > 0;
+TArray<AVillagerPath*> AVillageResident::GetVisiblePaths()
+{
+    TArray<AVillagerPath*> Result;
+
+    TArray<UPrimitiveComponent*> OverlappingComponents = GetVisibleComponents();
+
+    for (UPrimitiveComponent* Component : OverlappingComponents)
+    {
+        if (USplineMeshComponent* SplineMesh = Cast<USplineMeshComponent>(Component))
+        {
+            if (AVillagerPath* Path = Cast<AVillagerPath>(SplineMesh->GetOwner()))
+            {
+                Result.Add(Path);
+            }
+        }
+    }
+
+    return Result;
+}
+
+bool AVillageResident::IsThereVisiblePath()
+{
+    return GetVisiblePaths().Num() > 0;
+}
+
+EVillagerDesiredState AVillageResident::DecideWhatToDo() 
+{
+    switch (GetStressState())
+    {
+    case EStressState::Calm:
+        if (UKismetMathLibrary::RandomBoolWithWeight(1.5 * exp(1 * -Energy)))
+        {
+            return EVillagerDesiredState::Chill;
+        }
+        if (Energy > 0.75f && IsThereVisiblePath())
+        {
+            EVillagerDesiredState::WalkAlongPath;
+        }
+        if (Energy > 0.3f && IsThereVisibleTalkingSlot())
+        {
+            EVillagerDesiredState::Talk;
+        }
+           return EVillagerDesiredState::WalkAround;
+        break;
+    default:
+        return EVillagerDesiredState::WalkAround;
+    }
+}
+
+EStressState AVillageResident::GetStressState() const 
+{
+    if (Stress > 0.75f)
+    {
+        return EStressState::Panic;
+    }
+    if (Stress > 0.5f)
+    {
+        return EStressState::Frightened;
+    }
+    if (Stress > 0.25f)
+    {
+        return EStressState::Anxious;
+    }
+    return EStressState::Calm;
 }
 
 // Called when the game starts or when spawned
 void AVillageResident::BeginPlay()
 {
-	VillagerState = EVillagerState::WalkingAroundLocation;
-
-	SpawnPoint = GetActorLocation();
+	WalkAroundPoint = GetActorLocation();
 
 	// Call the base class  
 	Super::BeginPlay();
-
-	FTimespan NowTimeSpan = FTimespan::FromSeconds(FDateTime::Now().GetTimeOfDay().GetTotalSeconds());
 }
 
 // Called every frame

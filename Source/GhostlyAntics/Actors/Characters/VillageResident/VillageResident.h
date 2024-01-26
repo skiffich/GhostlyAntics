@@ -5,18 +5,37 @@
 #include "CoreMinimal.h"
 #include "../../Characters/GACharacter/GACharacter.h"
 #include "../Plugins/Runtime/GameplayStateTree/Source/GameplayStateTreeModule/Public/Components/StateTreeComponent.h"
-#include "Components/SplineComponent.h"
+#include "../../../AI/VillagerPath.h"
 #include "../../../AI/Slot/SlotComponent.h"
 #include "VillageResident.generated.h"
 
 UENUM(BlueprintType)
 enum class EVillagerState : uint8
 {
-	None UMETA(DisplayName = "None"),
-	WalkingAroundLocation UMETA(DisplayName = "WalkingAroundLocation"),
-	WalkingALongSpline UMETA(DisplayName = "WalkingALongSpline"),
-	WantToTalk UMETA(DisplayName = "WantToTalk"),
-	Talking UMETA(DisplayName = "Talking")
+	Chilling UMETA(DisplayName = "Chilling"),
+	WalkingAround UMETA(DisplayName = "Walking Around"),
+	WalkingAlongPath UMETA(DisplayName = "Walking Along Path"),
+	Talking UMETA(DisplayName = "Talking"),
+	Interacting UMETA(DisplayName = "Interacting")
+};
+
+UENUM(BlueprintType)
+enum class EVillagerDesiredState : uint8
+{
+	Chill UMETA(DisplayName = "Chill"),
+	WalkAround UMETA(DisplayName = "Walk Around"),
+	WalkAlongPath UMETA(DisplayName = "Walk Along Path"),
+	Talk UMETA(DisplayName = "Talk"),
+	Interract UMETA(DisplayName = "Interract"),
+};
+
+UENUM(BlueprintType)
+enum class EStressState : uint8
+{
+	Calm UMETA(DisplayName = "Calm"), // Stress is 0.0 - 0.25
+	Anxious UMETA(DisplayName = "Anxious"), // Stress is 0.26 - 0.5
+	Frightened UMETA(DisplayName = "Frightened"), // Stress is 0.51 - 0.75
+	Panic UMETA(DisplayName = "Panic") // Stress is 0.75 - 1.0
 };
 
 UCLASS()
@@ -42,13 +61,48 @@ public:
 	FORCEINLINE EVillagerState GetState() { return VillagerState; }
 
 	UFUNCTION(BlueprintCallable)
-	FORCEINLINE void SetState(EVillagerState newState) { VillagerState = newState; }
+	void SetState(EVillagerState newState);
 
 	UFUNCTION(BlueprintCallable, BlueprintPure)
-	TArray<USlotComponent*> GetVisibleSlotsInRadius();
+	double GetCurrentStateDuration();
+
+private:
+	TArray<UPrimitiveComponent*> GetVisibleComponents();
+
+public:
+
+	UFUNCTION(BlueprintCallable, BlueprintPure)
+	TArray<USlotComponent*> GetVisibleSlots();
+
+	// Talking
+
+	UFUNCTION(BlueprintCallable, BlueprintPure)
+	TArray<USlotComponent*> GetVisibleTalkingSlots();
 
 	UFUNCTION(BlueprintCallable, BlueprintPure)
 	bool IsThereVisibleTalkingSlot();
+
+	// Paths
+	UFUNCTION(BlueprintCallable, BlueprintPure)
+	TArray<AVillagerPath*> GetVisiblePaths();
+
+	UFUNCTION(BlueprintCallable, BlueprintPure)
+	bool IsThereVisiblePath();
+
+	UFUNCTION(BlueprintCallable, BlueprintPure)
+	EVillagerDesiredState DecideWhatToDo();
+
+	UFUNCTION(BlueprintCallable, BlueprintPure)
+	EStressState GetStressState() const;
+
+	UFUNCTION(BlueprintCallable, BlueprintPure)
+	FORCEINLINE float GetSightRadius() const { return SightRadius; }
+
+	UFUNCTION(BlueprintCallable, BlueprintPure)
+	FORCEINLINE bool GetPathFollowingDirection() const { return bPathFollowingDirection; }
+
+	UFUNCTION(BlueprintCallable)
+	FORCEINLINE void SetPathFollowingDirection(bool newDirrection) { bPathFollowingDirection = newDirrection; }
 
 protected:
 	// To add mapping context
@@ -61,15 +115,21 @@ private:
 	UPROPERTY(VisibleInstanceOnly)
 	EVillagerState VillagerState;
 
-	UPROPERTY(EditDefaultsOnly)
-	float SightRadius = 300.f;
-
 	UPROPERTY(VisibleInstanceOnly)
-	FVector SpawnPoint;
+	FVector WalkAroundPoint;
+
+	bool bPathFollowingDirection = false;
 
 	/* Min time in seconds which should be passed before new check */
-	const float CheckSlotsPerSeconds = 3.0f;
+	const float CheckPeriod = 3.0f;
 
-	TArray<USlotComponent*> LastFoundSlots;
-	FTimespan LastFoundSlotsTimeSpan;
+	TArray<UPrimitiveComponent*> LastFoundComponents;
+	FTimespan LastFoundComponentsTimeSpan;
+
+	FTimespan StateChangedTimeSpan;
+
+	float SightRadius;
+	float Energy;
+	float Intelligence;
+	float Stress;
 };
