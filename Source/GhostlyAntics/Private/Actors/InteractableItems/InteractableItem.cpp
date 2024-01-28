@@ -17,6 +17,7 @@ AInteractableItem::AInteractableItem()
     RootComponent = StaticMesh;
 
     AudioComponent = CreateDefaultSubobject<UAudioComponent>(TEXT("AudioComponent"));
+    AudioComponent->SetupAttachment(RootComponent);
 
     NavModifier = CreateDefaultSubobject<UNavModifierComponent>(TEXT("NavModifier"));
     NavModifier->RegisterComponent();
