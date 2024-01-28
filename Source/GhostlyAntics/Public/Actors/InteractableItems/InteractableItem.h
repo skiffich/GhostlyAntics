@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
-#include "Actors/InteractInterface.h"
+#include "Actors/InteractableItems/InteractInterface.h"
 #include "Components/WidgetComponent.h"
 #include "Sound/SoundCue.h"
 #include "Components/AudioComponent.h"

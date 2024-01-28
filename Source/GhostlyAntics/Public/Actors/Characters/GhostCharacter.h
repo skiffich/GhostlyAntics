@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Actors/Characters/GACharacter.h"
-#include "Actors/InteractInterface.h"
+#include "Actors/InteractableItems/InteractInterface.h"
 #include "InputActionValue.h"
 #include "GhostCharacter.generated.h"
 
