@@ -47,6 +47,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "GameplayTags")
 	FGameplayTagContainer GameplayTags;
 
+	UFUNCTION(BlueprintCallable, BlueprintPure)
+	FORCEINLINE AActor* GetClaimedActor() { return ClaimedActor.Get(); }
+
 private:
 	ESlotState State;
 	TSoftObjectPtr<AActor> ClaimedActor;

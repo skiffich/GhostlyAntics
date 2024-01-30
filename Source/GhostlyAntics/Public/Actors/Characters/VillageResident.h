@@ -31,4 +31,7 @@ public:
 	AVillageResident();
 
 	FORCEINLINE UBehaviorTree* GetBehaviorTree() const { return BehaviorTree; }
+
+	UFUNCTION(BlueprintCallable, BlueprintPure)
+	FORCEINLINE USlotComponent* GetTalkingSlot() { return TalkingSlot; }
 };

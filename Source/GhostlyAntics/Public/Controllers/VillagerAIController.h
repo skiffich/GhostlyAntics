@@ -39,7 +39,7 @@ class GHOSTLYANTICS_API AVillagerAIController : public AAIController
 	GENERATED_BODY()
 
 public:
-	AVillagerAIController();
+	AVillagerAIController(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
 
 private:
 	// AI Perception Component reference
@@ -94,7 +94,7 @@ public:
 	bool IsThereVisiblePath() const;
 
 	UFUNCTION(BlueprintCallable, BlueprintPure)
-	EVillagerState DecideWhatToDo() const;
+	EVillagerState DecideWhatToDo();
 
 	UFUNCTION(BlueprintCallable, BlueprintPure)
 	EStressState GetStressState() const;
@@ -107,6 +107,13 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	FORCEINLINE void SetPathFollowingDirection(bool newDirrection) { bPathFollowingDirection = newDirrection; }
+	
+private:
+	bool IsReadyToTalk() const;
+
+	bool TryToTalk();
+
+	void InterruptCurrentTask();
 
 private:
 	EVillagerState VillagerState;
